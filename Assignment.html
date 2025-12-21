@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack Explorer - Interactive Data Structure Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 2px;
+            box-shadow: 0 -12px 0 white, 0 -24px 0 white;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-item {
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            transition: left 0.3s ease;
+            z-index: 999;
+            padding: 100px 0 20px 0;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-toggle {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar-toggle:hover {
+            background: #764ba2;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .sidebar h3 {
+            padding: 0 20px;
+            margin-bottom: 20px;
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            color: #333;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-left-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.sidebar-open {
+            margin-left: 300px;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Home Page */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: white;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        /* Operation Pages */
+        .operation-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-top: 2rem;
+        }
+
+        .operation-visual {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .operation-info {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+        }
+
+        .stack-container {
+            position: relative;
+            width: 200px;
+            height: 300px;
+            margin: 2rem auto;
+            border: 3px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .stack-element {
+            width: 150px;
+            height: 40px;
+            margin: 2px 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.5s ease;
+            position: relative;
+        }
+
+        .stack-element:nth-child(1) { background: #ff6b6b; }
+        .stack-element:nth-child(2) { background: #4ecdc4; }
+        .stack-element:nth-child(3) { background: #45b7d1; }
+        .stack-element:nth-child(4) { background: #96ceb4; }
+        .stack-element:nth-child(5) { background: #feca57; }
+
+        .controls {
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .control-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .input-group {
+            margin: 1rem 0;
+        }
+
+        .input-group input {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1rem;
+            width: 150px;
+            margin-right: 10px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .code-section {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1.5rem 0;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .code-section::before {
+            content: 'C++';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .steps-list {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .steps-list li {
+            counter-increment: step-counter;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            position: relative;
+            padding-left: 3rem;
+        }
+
+        .steps-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* Application Pages */
+        .application-demo {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .demo-area {
+            min-height: 300px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .text-editor {
+            width: 100%;
+            height: 200px;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .browser-simulation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .browser-bar {
+            background: #f0f0f0;
+            padding: 10px 20px;
+            border-radius: 25px;
+            min-width: 300px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        .page-stack {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 5px;
+            margin: 1rem 0;
+        }
+
+        .page-item {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            min-width: 200px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .page-item.highlighted {
+            background: #ff6b6b;
+            transform: scale(1.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .operation-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .nav-menu {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideInFromTop {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutToTop {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes highlight {
+            0%, 100% { background-color: inherit; }
+            50% { background-color: #ffeb3b; }
+        }
+
+        .animate-push {
+            animation: slideInFromTop 0.5s ease;
+        }
+
+        .animate-pop {
+            animation: slideOutToTop 0.5s ease forwards;
+        }
+
+        .animate-highlight {
+            animation: highlight 1s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <div class="logo-stack-block"></div>
+                    <div class="logo-stack-block"></div>
+                    <div class="logo-stack-block"></div>
+                    <div class="logo-stack-block"></div>
+                </div>
+                Stack Explorer
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item active" onclick="showPage('home')">Home</li>
+                    <li class="nav-item" onclick="showPage('push')">Push</li>
+                    <li class="nav-item" onclick="showPage('pop')">Pop</li>
+                    <li class="nav-item" onclick="showPage('peek')">Peek/Top</li>
+                    <li class="nav-item" onclick="showPage('display')">Display</li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Sidebar Toggle -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <h3>Real-Life Applications</h3>
+        <div class="sidebar-item" onclick="showPage('undo-redo')">
+            📝 Undo/Redo in Editors
+        </div>
+        <div class="sidebar-item" onclick="showPage('browser-nav')">
+            🌐 Browser Navigation
+        </div>
+        <div class="sidebar-item" onclick="showPage('expression-eval')">
+            🧮 Expression Evaluation
+        </div>
+        <div class="sidebar-item" onclick="showPage('recursion-stack')">
+            🔄 Call Stack in Recursion
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <div class="hero">
+                <h1>Welcome to Stack Explorer</h1>
+                <p>Discover the power of Stack data structure through interactive visualizations and real-world applications. Learn how LIFO (Last In, First Out) principle works in programming and everyday life.</p>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>What is a Stack?</h3>
+                    <p>A Stack is a linear data structure that follows the LIFO (Last In, First Out) principle. Think of it like a stack of plates - you can only add or remove plates from the top!</p>
+                </div>
+                <div class="feature-card">
+                    <h3>LIFO Principle</h3>
+                    <p>Last In, First Out means the most recently added element is the first one to be removed. This makes stacks perfect for scenarios where you need to reverse the order of operations.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Key Operations</h3>
+                    <p>Master the four fundamental stack operations: Push (add), Pop (remove), Peek (view top), and Display (show all elements). Each operation is visualized interactively!</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Real Applications</h3>
+                    <p>From undo/redo functionality to browser navigation and mathematical expression evaluation, stacks are everywhere in computer science and daily computing tasks.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Push Page -->
+        <div id="push" class="page">
+            <h1>Push Operation</h1>
+            <div class="operation-container">
+                <div class="operation-visual">
+                    <h3>Push Visualization</h3>
+                    <div class="stack-container" id="pushStack">
+                        <div class="stack-element">10</div>
+                        <div class="stack-element">20</div>
+                        <div class="stack-element">30</div>
+                    </div>
+                    <div class="controls">
+                        <div class="input-group">
+                            <input type="number" id="pushInput" placeholder="Enter value" value="40">
+                            <button class="control-btn" onclick="animatePush()">Push Element</button>
+                        </div>
+                        <button class="control-btn" onclick="resetPushStack()">Reset Stack</button>
+                    </div>
+                </div>
+                <div class="operation-info">
+                    <h3>How Push Works</h3>
+                    <ol class="steps-list">
+                        <li>Check if the stack is full (Stack Overflow condition)</li>
+                        <li>If not full, increment the top pointer</li>
+                        <li>Add the new element at the top position</li>
+                        <li>The new element becomes the top of the stack</li>
+                    </ol>
+                    
+                    <div class="code-section">
+void push(int x) {
+    if(top == MAX-1) {
+        cout << "Stack Overflow";
+    } else {
+        stack[++top] = x;
+        cout << "Pushed " << x;
+    }
+}
+                    </div>
+                    
+                    <h4>Time Complexity: O(1)</h4>
+                    <p>Push operation takes constant time as we only need to add one element at the top.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pop Page -->
+        <div id="pop" class="page">
+            <h1>Pop Operation</h1>
+            <div class="operation-container">
+                <div class="operation-visual">
+                    <h3>Pop Visualization</h3>
+                    <div class="stack-container" id="popStack">
+                        <div class="stack-element">10</div>
+                        <div class="stack-element">20</div>
+                        <div class="stack-element">30</div>
+                        <div class="stack-element">40</div>
+                    </div>
+                    <div class="controls">
+                        <button class="control-btn" onclick="animatePop()">Pop Element</button>
+                        <button class="control-btn" onclick="resetPopStack()">Reset Stack</button>
+                        <div id="poppedValue" style="margin-top: 1rem; font-weight: bold; color: #667eea;"></div>
+                    </div>
+                </div>
+                <div class="operation-info">
+                    <h3>How Pop Works</h3>
+                    <ol class="steps-list">
+                        <li>Check if the stack is empty (Stack Underflow condition)</li>
+                        <li>If not empty, store the top element value</li>
+                        <li>Decrement the top pointer</li>
+                        <li>Return the stored value</li>
+                    </ol>
+                    
+                    <div class="code-section">
+int pop() {
+    if(top == -1) {
+        cout << "Stack Underflow";
+        return -1;
+    } else {
+        int x = stack[top--];
+        return x;
+    }
+}
+                    </div>
+                    
+                    <h4>Time Complexity: O(1)</h4>
+                    <p>Pop operation takes constant time as we only need to remove the top element.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Peek Page -->
+        <div id="peek" class="page">
+            <h1>Peek/Top Operation</h1>
+            <div class="operation-container">
+                <div class="operation-visual">
+                    <h3>Peek Visualization</h3>
+                    <div class="stack-container" id="peekStack">
+                        <div class="stack-element">10</div>
+                        <div class="stack-element">20</div>
+                        <div class="stack-element">30</div>
+                        <div class="stack-element">40</div>
+                    </div>
+                    <div class="controls">
+                        <button class="control-btn" onclick="animatePeek()">Peek Top Element</button>
+                        <button class="control-btn" onclick="resetPeekStack()">Reset Stack</button>
+                        <div id="peekValue" style="margin-top: 1rem; font-weight: bold; color: #667eea;"></div>
+                    </div>
+                </div>
+                <div class="operation-info">
+                    <h3>How Peek Works</h3>
+                    <ol class="steps-list">
+                        <li>Check if the stack is empty</li>
+                        <li>If not empty, return the top element value</li>
+                        <li>Do NOT remove or modify the stack</li>
+                        <li>The stack remains unchanged after peek</li>
+                    </ol>
+                    
+                    <div class="code-section">
+int peek() {
+    if(top == -1) {
+        cout << "Stack is empty";
+        return -1;
+    } else {
+        return stack[top];
+    }
+}
+                    </div>
+                    
+                    <h4>Time Complexity: O(1)</h4>
+                    <p>Peek operation takes constant time as we only access the top element without any modifications.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Display Page -->
+        <div id="display" class="page">
+            <h1>Display/Traverse Operation</h1>
+            <div class="operation-container">
+                <div class="operation-visual">
+                    <h3>Display Visualization</h3>
+                    <div class="stack-container" id="displayStack">
+                        <div class="stack-element">10</div>
+                        <div class="stack-element">20</div>
+                        <div class="stack-element">30</div>
+                        <div class="stack-element">40</div>
+                        <div class="stack-element">50</div>
+                    </div>
+                    <div class="controls">
+                        <button class="control-btn" onclick="animateDisplay()">Display Stack</button>
+                        <button class="control-btn" onclick="resetDisplayStack()">Reset Stack</button>
+                        <div id="displayOutput" style="margin-top: 1rem; font-family: monospace; background: #f0f0f0; padding: 1rem; border-radius: 8px; text-align: left;"></div>
+                    </div>
+                </div>
+                <div class="operation-info">
+                    <h3>How Display Works</h3>
+                    <ol class="steps-list">
+                        <li>Check if the stack is empty</li>
+                        <li>If empty, display "Stack is empty"</li>
+                        <li>If not empty, traverse from top to bottom</li>
+                        <li>Print each element in LIFO order</li>
+                    </ol>
+                    
+                    <div class="code-section">
+void display() {
+    if(top == -1) {
+        cout << "Stack is empty";
+    } else {
+        cout << "Stack elements: ";
+        for(int i = top; i >= 0; i--) {
+            cout << stack[i] << " ";
+        }
+    }
+}
+                    </div>
+                    
+                    <h4>Time Complexity: O(n)</h4>
+                    <p>Display operation takes linear time as we need to traverse all n elements in the stack.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Undo/Redo Application -->
+        <div id="undo-redo" class="page">
+            <h1>Undo/Redo in Text Editors</h1>
+            <div class="application-demo">
+                <h3>Text Editor with Undo/Redo Stack</h3>
+                <textarea id="textEditor" class="text-editor" placeholder="Start typing to see undo/redo in action..."></textarea>
+                <div class="controls">
+                    <button class="control-btn" onclick="undoAction()" id="undoBtn">Undo</button>
+                    <button class="control-btn" onclick="redoAction()" id="redoBtn">Redo</button>
+                    <button class="control-btn" onclick="clearEditor()">Clear</button>
+                </div>
+                <div class="demo-area">
+                    <div>
+                        <h4>Undo Stack (Recent actions at top):</h4>
+                        <div id="undoStackDisplay" class="page-stack"></div>
+                    </div>
+                </div>
+                <div class="operation-info">
+                    <p><strong>How it works:</strong> Every action you perform is pushed onto the undo stack. When you hit undo, the last action is popped from the undo stack and pushed onto the redo stack. This allows you to go back and forth through your editing history using the LIFO principle!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Browser Navigation Application -->
+        <div id="browser-nav" class="page">
+            <h1>Browser Back/Forward Navigation</h1>
+            <div class="application-demo">
+                <h3>Browser History Simulation</h3>
+                <div class="browser-simulation">
+                    <div class="browser-bar" id="currentPage">google.com</div>
+                    <div class="controls">
+                        <button class="control-btn" onclick="visitPage('facebook.com')">Visit Facebook</button>
+                        <button class="control-btn" onclick="visitPage('youtube.com')">Visit YouTube</button>
+                        <button class="control-btn" onclick="visitPage('github.com')">Visit GitHub</button>
+                        <button class="control-btn" onclick="goBack()" id="backBtn">← Back</button>
+                        <button class="control-btn" onclick="goForward()" id="forwardBtn">Forward →</button>
+                    </div>
+                    <div class="demo-area">
+                        <div>
+                            <h4>Browser History Stack:</h4>
+                            <div id="historyStack" class="page-stack">
+                                <div class="page-item highlighted">google.com</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="operation-info">
+                    <p><strong>How it works:</strong> When you visit a new page, it's pushed onto the history stack. When you click back, pages are popped from the back stack and pushed onto the forward stack. This allows seamless navigation through your browsing history using stack operations!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expression Evaluation Application -->
+        <div id="expression-eval" class="page">
+            <h1>Expression Evaluation</h1>
+            <div class="application-demo">
+                <h3>Infix to Postfix Conversion</h3>
+                <div class="input-group">
+                    <input type="text" id="infixInput" placeholder="Enter infix expression (e.g., A+B*C)" value="A+B*C">
+                    <button class="control-btn" onclick="convertExpression()">Convert</button>
+                </div>
+                <div class="demo-area" id="expressionDemo">
+                    <div>
+                        <h4>Operator Stack:</h4>
+                        <div id="operatorStack" class="page-stack"></div>
+                        <h4>Output:</h4>
+                        <div id="postfixOutput" style="background: #f0f0f0; padding: 1rem; border-radius: 8px; margin-top: 1rem; font-family: monospace;"></div>
+                    </div>
+                </div>
+                <div class="operation-info">
+                    <p><strong>How it works:</strong> The algorithm uses a stack to convert infix expressions to postfix. Operands go directly to output, operators are pushed/popped from the stack based on precedence rules. This demonstrates how stacks manage the order of operations in mathematical expressions!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recursion Stack Application -->
+        <div id="recursion-stack" class="page">
+            <h1>Call Stack in Recursion</h1>
+            <div class="application-demo">
+                <h3>Factorial Function Call Stack</h3>
+                <div class="input-group">
+                    <input type="number" id="factorialInput" placeholder="Enter number (1-6)" value="4" min="1" max="6">
+                    <button class="control-btn" onclick="calculateFactorial()">Calculate Factorial</button>
+                </div>
+                <div class="demo-area">
+                    <div>
+                        <h4>Function Call Stack:</h4>
+                        <div id="callStack" class="page-stack"></div>
+                        <div id="factorialResult" style="margin-top: 1rem; font-size: 1.2rem; font-weight: bold; color: #667eea;"></div>
+                    </div>
+                </div>
+                <div class="operation-info">
+                    <p><strong>How it works:</strong> When a recursive function calls itself, each call is pushed onto the call stack. When a function returns, it's popped from the stack. This visualization shows how factorial(n) creates a stack of function calls that resolve in LIFO order!</p>
+                    <div class="code-section">
+int factorial(int n) {
+    if(n <= 1) {
+        return 1;
+    }
+    return n * factorial(n-1);
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global variables
+        let sidebarOpen = false;
+        let undoStack = [];
+        let redoStack = [];
+        let previousText = '';
+        let historyStack = ['google.com'];
+        let forwardStack = [];
+        let currentPageIndex = 0;
+
+        // Navigation functions
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Find and activate the corresponding nav item
+            const navItems = document.querySelectorAll('.nav-item');
+            const pageOrder = ['home', 'push', 'pop', 'peek', 'display'];
+            const pageIndex = pageOrder.indexOf(pageId);
+            if (pageIndex !== -1) {
+                navItems[pageIndex].classList.add('active');
+            }
+            
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                closeSidebar();
+            }
+        }
+
+        function toggleSidebar() {
+            sidebarOpen = !sidebarOpen;
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            if (sidebarOpen) {
+                sidebar.classList.add('active');
+                mainContent.classList.add('sidebar-open');
+            } else {
+                sidebar.classList.remove('active');
+                mainContent.classList.remove('sidebar-open');
+            }
+        }
+
+        function closeSidebar() {
+            sidebarOpen = false;
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('mainContent').classList.remove('sidebar-open');
+        }
+
+        // Push operation functions
+        function animatePush() {
+            const stack = document.getElementById('pushStack');
+            const input = document.getElementById('pushInput');
+            const value = input.value || Math.floor(Math.random() * 100);
+            
+            if (stack.children.length >= 8) {
+                alert('Stack Overflow! Maximum capacity reached.');
+                return;
+            }
+            
+            const newElement = document.createElement('div');
+            newElement.className = 'stack-element animate-push';
+            newElement.textContent = value;
+            newElement.style.backgroundColor = getRandomColor();
+            
+            stack.appendChild(newElement);
+            input.value = '';
+            
+            setTimeout(() => {
+                newElement.classList.remove('animate-push');
+            }, 500);
+        }
+
+        function resetPushStack() {
+            const stack = document.getElementById('pushStack');
+            stack.innerHTML = `
+                <div class="stack-element">10</div>
+                <div class="stack-element">20</div>
+                <div class="stack-element">30</div>
+            `;
+        }
+
+        // Pop operation functions
+        function animatePop() {
+            const stack = document.getElementById('popStack');
+            const poppedValueDiv = document.getElementById('poppedValue');
+            
+            if (stack.children.length === 0) {
+                alert('Stack Underflow! Stack is empty.');
+                poppedValueDiv.textContent = 'Stack is empty!';
+                return;
+            }
+            
+            const topElement = stack.lastElementChild;
+            const value = topElement.textContent;
+            
+            topElement.classList.add('animate-pop');
+            poppedValueDiv.textContent = `Popped value: ${value}`;
+            
+            setTimeout(() => {
+                stack.removeChild(topElement);
+            }, 500);
+        }
+
+        function resetPopStack() {
+            const stack = document.getElementById('popStack');
+            const poppedValueDiv = document.getElementById('poppedValue');
+            stack.innerHTML = `
+                <div class="stack-element">10</div>
+                <div class="stack-element">20</div>
+                <div class="stack-element">30</div>
+                <div class="stack-element">40</div>
+            `;
+            poppedValueDiv.textContent = '';
+        }
+
+        // Peek operation functions
+        function animatePeek() {
+            const stack = document.getElementById('peekStack');
+            const peekValueDiv = document.getElementById('peekValue');
+            
+            if (stack.children.length === 0) {
+                peekValueDiv.textContent = 'Stack is empty!';
+                return;
+            }
+            
+            const topElement = stack.lastElementChild;
+            const value = topElement.textContent;
+            
+            topElement.classList.add('animate-highlight');
+            peekValueDiv.textContent = `Top element: ${value}`;
+            
+            setTimeout(() => {
+                topElement.classList.remove('animate-highlight');
+            }, 1000);
+        }
+
+        function resetPeekStack() {
+            const stack = document.getElementById('peekStack');
+            const peekValueDiv = document.getElementById('peekValue');
+            stack.innerHTML = `
+                <div class="stack-element">10</div>
+                <div class="stack-element">20</div>
+                <div class="stack-element">30</div>
+                <div class="stack-element">40</div>
+            `;
+            peekValueDiv.textContent = '';
+        }
+
+        // Display operation functions
+        function animateDisplay() {
+            const stack = document.getElementById('displayStack');
+            const outputDiv = document.getElementById('displayOutput');
+            const elements = Array.from(stack.children);
+            
+            if (elements.length === 0) {
+                outputDiv.textContent = 'Stack is empty!';
+                return;
+            }
+            
+            outputDiv.textContent = 'Displaying stack elements:\n';
+            
+            // Animate each element and display
+            elements.reverse().forEach((element, index) => {
+                setTimeout(() => {
+                    element.classList.add('animate-highlight');
+                    outputDiv.textContent += `Position ${index}: ${element.textContent}\n`;
+                    
+                    setTimeout(() => {
+                        element.classList.remove('animate-highlight');
+                    }, 500);
+                }, index * 600);
+            });
+        }
+
+        function resetDisplayStack() {
+            const stack = document.getElementById('displayStack');
+            const outputDiv = document.getElementById('displayOutput');
+            stack.innerHTML = `
+                <div class="stack-element">10</div>
+                <div class="stack-element">20</div>
+                <div class="stack-element">30</div>
+                <div class="stack-element">40</div>
+                <div class="stack-element">50</div>
+            `;
+            outputDiv.textContent = '';
+        }
+
+        // Undo/Redo functionality
+        function initializeUndoRedo() {
+            const textEditor = document.getElementById('textEditor');
+            previousText = textEditor.value;
+            
+            textEditor.addEventListener('input', function() {
+                const currentText = textEditor.value;
+                if (currentText !== previousText) {
+                    undoStack.push(previousText);
+                    redoStack = []; // Clear redo stack on new input
+                    previousText = currentText;
+                    updateUndoRedoButtons();
+                    updateUndoStackDisplay();
+                }
+            });
+        }
+
+        function undoAction() {
+            const textEditor = document.getElementById('textEditor');
+            if (undoStack.length > 0) {
+                redoStack.push(textEditor.value);
+                const previousState = undoStack.pop();
+                textEditor.value = previousState;
+                previousText = previousState;
+                updateUndoRedoButtons();
+                updateUndoStackDisplay();
+            }
+        }
+
+        function redoAction() {
+            const textEditor = document.getElementById('textEditor');
+            if (redoStack.length > 0) {
+                undoStack.push(textEditor.value);
+                const nextState = redoStack.pop();
+                textEditor.value = nextState;
+                previousText = nextState;
+                updateUndoRedoButtons();
+                updateUndoStackDisplay();
+            }
+        }
+
+        function clearEditor() {
+            const textEditor = document.getElementById('textEditor');
+            undoStack.push(textEditor.value);
+            textEditor.value = '';
+            previousText = '';
+            redoStack = [];
+            updateUndoRedoButtons();
+            updateUndoStackDisplay();
+        }
+
+        function updateUndoRedoButtons() {
+            document.getElementById('undoBtn').disabled = undoStack.length === 0;
+            document.getElementById('redoBtn').disabled = redoStack.length === 0;
+        }
+
+        function updateUndoStackDisplay() {
+            const stackDisplay = document.getElementById('undoStackDisplay');
+            stackDisplay.innerHTML = '';
+            
+            undoStack.slice(-5).reverse().forEach(action => {
+                const actionDiv = document.createElement('div');
+                actionDiv.className = 'page-item';
+                actionDiv.textContent = action.substring(0, 20) + (action.length > 20 ? '...' : '') || '(empty)';
+                stackDisplay.appendChild(actionDiv);
+            });
+        }
+
+        // Browser navigation functionality
+        function visitPage(url) {
+            // Clear forward stack when visiting a new page
+            forwardStack = [];
+            historyStack.push(url);
+            currentPageIndex = historyStack.length - 1;
+            
+            document.getElementById('currentPage').textContent = url;
+            updateHistoryDisplay();
+            updateNavigationButtons();
+        }
+
+        function goBack() {
+            if (currentPageIndex > 0) {
+                forwardStack.push(historyStack[currentPageIndex]);
+                currentPageIndex--;
+                document.getElementById('currentPage').textContent = historyStack[currentPageIndex];
+                updateHistoryDisplay();
+                updateNavigationButtons();
+            }
+        }
+
+        function goForward() {
+            if (forwardStack.length > 0) {
+                currentPageIndex++;
+                const page = forwardStack.pop();
+                document.getElementById('currentPage').textContent = historyStack[currentPageIndex];
+                updateHistoryDisplay();
+                updateNavigationButtons();
+            }
+        }
+
+        function updateHistoryDisplay() {
+            const historyDisplay = document.getElementById('historyStack');
+            historyDisplay.innerHTML = '';
+            
+            historyStack.slice().reverse().forEach((page, index) => {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'page-item';
+                if (historyStack.length - 1 - index === currentPageIndex) {
+                    pageDiv.classList.add('highlighted');
+                }
+                pageDiv.textContent = page;
+                historyDisplay.appendChild(pageDiv);
+            });
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('backBtn').disabled = currentPageIndex === 0;
+            document.getElementById('forwardBtn').disabled = forwardStack.length === 0;
+        }
+
+        // Expression evaluation functionality
+        function convertExpression() {
+            const infixInput = document.getElementById('infixInput');
+            const operatorStackDisplay = document.getElementById('operatorStack');
+            const postfixOutput = document.getElementById('postfixOutput');
+            
+            const infix = infixInput.value.trim();
+            if (!infix) return;
+            
+            const result = infixToPostfix(infix);
+            postfixOutput.innerHTML = `
+                <strong>Infix:</strong> ${infix}<br>
+                <strong>Postfix:</strong> ${result.postfix}<br>
+                <strong>Steps:</strong><br>${result.steps.join('<br>')}
+            `;
+        }
+
+        function infixToPostfix(infix) {
+            const stack = [];
+            const postfix = [];
+            const steps = [];
+            const precedence = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3};
+            
+            for (let char of infix) {
+                if (char.match(/[A-Za-z0-9]/)) {
+                    postfix.push(char);
+                    steps.push(`Add operand '${char}' to output`);
+                } else if (char === '(') {
+                    stack.push(char);
+                    steps.push(`Push '${char}' to stack`);
+                } else if (char === ')') {
+                    while (stack.length && stack[stack.length - 1] !== '(') {
+                        const op = stack.pop();
+                        postfix.push(op);
+                        steps.push(`Pop '${op}' from stack to output`);
+                    }
+                    stack.pop(); // Remove '('
+                    steps.push(`Pop '(' from stack`);
+                } else if (precedence[char]) {
+                    while (stack.length && precedence[stack[stack.length - 1]] >= precedence[char]) {
+                        const op = stack.pop();
+                        postfix.push(op);
+                        steps.push(`Pop '${op}' from stack to output`);
+                    }
+                    stack.push(char);
+                    steps.push(`Push '${char}' to stack`);
+                }
+                updateOperatorStackDisplay(stack);
+            }
+            
+            while (stack.length) {
+                const op = stack.pop();
+                postfix.push(op);
+                steps.push(`Pop '${op}' from stack to output`);
+                updateOperatorStackDisplay(stack);
+            }
+            
+            return {
+                postfix: postfix.join(' '),
+                steps: steps
+            };
+        }
+
+        function updateOperatorStackDisplay(stack) {
+            const stackDisplay = document.getElementById('operatorStack');
+            stackDisplay.innerHTML = '';
+            
+            stack.slice().reverse().forEach(op => {
+                const opDiv = document.createElement('div');
+                opDiv.className = 'page-item';
+                opDiv.textContent = op;
+                stackDisplay.appendChild(opDiv);
+            });
+        }
+
+        // Recursion stack functionality
+        function calculateFactorial() {
+            const input = document.getElementById('factorialInput');
+            const callStackDisplay = document.getElementById('callStack');
+            const resultDiv = document.getElementById('factorialResult');
+            
+            const n = parseInt(input.value);
+            if (n < 1 || n > 6) {
+                alert('Please enter a number between 1 and 6');
+                return;
+            }
+            
+            callStackDisplay.innerHTML = '';
+            resultDiv.textContent = '';
+            
+            animateFactorial(n, callStackDisplay, resultDiv);
+        }
+
+        function animateFactorial(n, stackDisplay, resultDiv) {
+            const callStack = [];
+            let step = 0;
+            
+            // Push phase
+            function pushCalls() {
+                if (step <= n) {
+                    const call = `factorial(${n - step})`;
+                    callStack.push(call);
+                    
+                    const callDiv = document.createElement('div');
+                    callDiv.className = 'page-item';
+                    callDiv.textContent = call;
+                    stackDisplay.appendChild(callDiv);
+                    
+                    step++;
+                    setTimeout(pushCalls, 800);
+                } else {
+                    // Start pop phase
+                    setTimeout(popCalls, 1000);
+                }
+            }
+            
+            // Pop phase
+            function popCalls() {
+                if (callStack.length > 0) {
+                    const call = callStack.pop();
+                    stackDisplay.removeChild(stackDisplay.lastElementChild);
+                    
+                    const currentN = n - callStack.length;
+                    const result = currentN === 0 ? 1 : currentN;
+                    
+                    setTimeout(popCalls, 800);
+                } else {
+                    // Calculate final result
+                    let factorial = 1;
+                    for (let i = 1; i <= n; i++) {
+                        factorial *= i;
+                    }
+                    resultDiv.textContent = `factorial(${n}) = ${factorial}`;
+                }
+            }
+            
+            pushCalls();
+        }
+
+        // Utility functions
+        function getRandomColor() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeUndoRedo();
+            updateUndoRedoButtons();
+            updateNavigationButtons();
+            updateHistoryDisplay();
+        });
+
+        // Handle responsive behavior
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768 && sidebarOpen) {
+                // Keep sidebar open on desktop
+            } else if (window.innerWidth <= 768) {
+                closeSidebar();
+            }
+        });
+    </script>
